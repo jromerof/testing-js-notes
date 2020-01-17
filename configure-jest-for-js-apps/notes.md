@@ -131,6 +131,94 @@ To decide what folders do you want to read to create the coverage add  an array 
 ```javascript
 collectCoverageFrom: ['**/src/**/*.js']
 ```
+To make a threshold for testing coverage you can add a ``coverageThreshold``object to your jest.config. You can add other objects with the directory names to make separated thresholds.
+
+```javascript
+coverageThreshold: {
+    global: {
+      statements: 34,
+      branches: 24,
+      functions: 34,
+      lines: 29,
+    },
+    './src/shared/utils.js': {
+      statements: 100,
+      branches: 80,
+      functions: 100,
+      lines: 100,
+    },
+  },
+```
+
+13) You can use multiple config passing the config as a parameter with the ``--config``flag
+
+You can use the global configs to run multiple config adding an array of ``projects`` to the jest global config. The array must have the path to the other configs.
+
+(It seems a good practice to have a common config and import it to the other ones)
+
+14) You can run eslint as a jest task, adding it to jest watch mode.
+
+Install ``jest-runner-eslint`` as a dev dependency.
+Then create a jest.lint.js like this:
+```javascript
+const path = require('path')
+
+module.exports = {
+  rootDir: path.join(__dirname, '..'),
+  displayName: 'lint',
+  runner: 'jest-runner-eslint',
+  testMatch: ['<rootDir>/**/*.js'],
+}
+```
+To ignore the .gitignore files add to your ``package.json``a config for jest-runner-eslint
+```json
+"jest-runner-eslint": {
+  "clipOptions": {
+    "ignorePath": "./.gitignore
+  }
+```
+Add the ``jest.lint.js``to the projects array in the ``jest.config.js`` and you're ready
+
+15) You can add the ``jest-watch-select-projects`` plugin to select an especific project to run test in watch mode.
+Add it to your jest config file
+```javascript
+...
+watchPlugins: ['jest-watch-select-projects'],
+...
+```
+16) To filter more easily wich file you want to test in watch mode you can install the ``jest-watch-typeahead``plugin to help you preview what files you're getting with  your patterns.
+
+```javascript
+watchPlugins: [
+  'jest-watch-select-projects',
+  'jest-watch-typeahead/filename',
+  'jest-watch-typeahead/testname',
+]
+```
+
+17) To run test on pre-commit only on the files changed you can use ``husky``and ``lint-staged``
+
+```
+npm install --save-dev husky lint-staged
+```
+```json
+//In package.json
+"husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && npm run build"
+    }
+  },
+  "lint-staged": {
+    "**/*.+(js|json|css|html|md)": [
+      "prettier",
+      "jest --findRelatedTests",
+      "git add"
+    ]
+  },
+```
 
 \* There is some other lessons on emotion and css modules that I didn't write because I don't particulary use them in my personal stack or at work
 
+\* Tools mentioned not on the notes: 
+* Codecov
+* is-ci package
