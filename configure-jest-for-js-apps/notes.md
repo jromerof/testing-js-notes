@@ -66,5 +66,71 @@ In this case  ```toMatchSnapshot()``` writes an snapshots to a ```.snap``` file.
 
 If you checked the new snapshot value and there is no error you can use the `-u` flag to update the snapshots. 
 
+7) Jest doesn't known when you do a Webpack resolve.modules with your utils to share them in your code, so it will thrown an error if you have them imported in the files that you're testing.
+You can configure Jest to read the modules the same way that your Webpack config adding a ``moduleDirectories`` to the config
+```javascript
+const path = require('path')
+module.exports {
+  ...
+  moduleDirectories: ['node_modules', path.join(__dirname, 'src'), 'yourModuleFolder'],
+  ...
+}
+```
+8) If you want to make an import boilerplate in all your test you can use ```setupFilesAfterEnv``` in the jest config
+```javascript
+module.exports = {
+  ...
+setupFilesAfterEnv: ['@some-import'],
+  ...
+```
+That way Jest will load the boilerplate after the setting up of the testing enviroment
+
+9) If you're using custom module imports for jest in the ``jest.config.js`` file eslint will throw error on the imports. 
+You can use an eslint-resolver with
+```
+npm install --save-dev eslint-import-resolver-jest
+```
+And then add to your .eslintrc an override for \_\_test__ folders
+```javascript
+  overrides: [
+    ...
+    {
+      files: ['**/__test__/**'],
+      settings: {
+        'import/resolver': {
+          jest: {
+            jestConfigFile: path.join(__dirname, './jest.config)
+        },
+    }},
+  ],
+```
+
+10) Jest has a watch mode to run tests autommatically. The watch mode checks the last git commit and run the test for files that changed.
+Watch mode is interactive so check the console.
+
+```javascript
+"scripts": {
+    ...
+    "test:watch": "jest --watch",
+    ...
+    }
+```
+
+11) You can debug your test with chrome. Write ``debugger`` at the place you want your code to stop and then run the debugger. You can add jest to the debugger with the following script.
+
+```javascript
+"scripts": {
+    ...
+    "test:debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --watch",
+    ...
+    }
+```
+
+12) You can make test coverage reports adding a ``--coverage``flag to your jest script.
+To decide what folders do you want to read to create the coverage add  an array of directories (or a expresion) to ``collectCoverageFrom``on your jest config.
+```javascript
+collectCoverageFrom: ['**/src/**/*.js']
+```
+
 \* There is some other lessons on emotion and css modules that I didn't write because I don't particulary use them in my personal stack or at work
 
